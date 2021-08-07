@@ -11,16 +11,17 @@ const renderer = new THREE.WebGLRenderer({
 })
 renderer.setPixelRatio(window.devicePixelRatio)
 renderer.setSize(window.innerWidth, window.innerHeight)
-camera.position.setZ(30)
+// camera.position.setZ(30)
 
 const geometry = new THREE.TorusGeometry(10, 3, 16, 100)
 const material = new THREE.MeshStandardMaterial({ color: 0xFF6347 })
 const torus = new THREE.Mesh(geometry, material)
+// torus.position.z = -10
 
 scene.add(torus)
 
 const pointLight = new THREE.PointLight(0xffffff)
-pointLight.position.set(5,5,5)
+pointLight.position.set(5, 5, 5)
 
 const ambientLight = new THREE.AmbientLight(0xffffff)
 scene.add(pointLight, ambientLight)
@@ -35,7 +36,7 @@ function addStar() {
   const geometry = new THREE.SphereGeometry(0.25, 24, 24)
   const material = new THREE.MeshStandardMaterial({ color: 0xffffff })
   const star = new THREE.Mesh(geometry, material)
-  const [x, y , z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100))
+  const [x, y, z] = Array(3).fill().map(() => THREE.MathUtils.randFloatSpread(100))
   star.position.set(x, y, z)
   scene.add(star)
 }
@@ -45,36 +46,62 @@ Array(200).fill().forEach(addStar)
 const spaceTexture = new THREE.TextureLoader().load('space.jpeg')
 scene.background = spaceTexture
 
-const jeffTexture = new THREE.TextureLoader().load('jeff.png')
-const jeff = new THREE.Mesh(
+const jamesTexture = new THREE.TextureLoader().load('james.jpeg')
+const james = new THREE.Mesh(
   new THREE.BoxGeometry(3, 3, 3),
-  new THREE.MeshBasicMaterial({ map: jeffTexture })
+  new THREE.MeshBasicMaterial({ map: jamesTexture })
 )
-scene.add(jeff)
+scene.add(james)
 
-const moonTexture = new THREE.TextureLoader().load('https://cdn.lost.show/images/earth-blue-marble.jpg')
-const normalTexture = new THREE.TextureLoader().load('https://cdn.lost.show/images/earth-topology.png')
+const earthTexture = new THREE.TextureLoader().load('./earth-blue-marble.jpeg')
+const normalTexture = new THREE.TextureLoader().load('./earth-topology.png')
+
+const earth = new THREE.Mesh(
+  new THREE.SphereGeometry(3, 32, 32),
+  new THREE.MeshStandardMaterial({
+    map: earthTexture,
+    normalMap: normalTexture,
+  })
+)
+scene.add(earth)
+
+earth.position.z = 25
+earth.position.setX(-10)
+
+const moonTexture = new THREE.TextureLoader().load('./moon.jpeg')
+const normalMoonTexture = new THREE.TextureLoader().load('./normal.jpeg')
 
 const moon = new THREE.Mesh(
   new THREE.SphereGeometry(3, 32, 32),
   new THREE.MeshStandardMaterial({
     map: moonTexture,
-    normalMap: normalTexture,
+    normalMap: normalMoonTexture,
   })
 )
 scene.add(moon)
 
-moon.position.z = 30
-moon.position.setX(-10)
+moon.position.z = 10
+moon.scale.x = 0.5
+moon.scale.y = 0.5
+moon.scale.z = 0.5
+// moon.position.setX(15)
+
+// Pivot point
+const pivotPoint = new THREE.Object3D();
+earth.add(pivotPoint);
+
+// make the pivotpoint the sphere's parent.
+pivotPoint.add(moon);
+
 
 function moveCamera() {
   const t = document.body.getBoundingClientRect().top
-  moon.rotation.x += 0.05
-  moon.rotation.y += 0.075
-  moon.rotation.z += 0.05
+  earth.rotation.x += 0.05
+  // earth.rotation.y += 0.075
+  earth.rotation.z += 0.05
 
-  jeff.rotation.y += 0.01
-  jeff.rotation.z += 0.01
+  james.rotation.y += 0.01
+  james.rotation.z += 0.01
 
   camera.position.z = t * -0.01
   camera.position.x = t * -0.0002
@@ -82,9 +109,18 @@ function moveCamera() {
 }
 
 document.body.onscroll = moveCamera
+window.addEventListener('resize', onWindowResize, false);
+
+function onWindowResize() {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
 
 function animate() {
   requestAnimationFrame(animate)
+  
+  pivotPoint.rotation.y += 0.005;
 
   torus.rotation.x += 0.01
   torus.rotation.y += 0.005

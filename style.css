@@ -9,7 +9,7 @@ canvas {
 }
 
 :root {
-  --dark-bg: rgba(15, 15, 15, 0.95);
+  --dark-bg: rgba(15, 15, 15, 0.85);
   --spacing: 350px;
 
   /* font-family: brandon-grotesque, sans-serif; */
@@ -80,7 +80,6 @@ canvas {
     background-color: white;
     font-size: 4rem;
     display: inline;
-    line-height: 1;
   }
 
   .left {
