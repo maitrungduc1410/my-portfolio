@@ -1,0 +1,143 @@
+# Publishes jamesisme.com to GitHub Pages.
+#
+# THE PUBLISH BOUNDARY, which is the part of this file worth reading twice.
+#
+# This repository is not a website directory. Alongside index.html it holds
+# working documents under docs/, and those are written for one reader. They
+# contain candid assessments of individual repositories, an open question about
+# side-project clearance with an employer, and an explicit list of things that
+# must never be said in public. Serving any of that from a personal domain would
+# be worse than never shipping the site at all.
+#
+# So this workflow never uploads the repository root. It copies a named list of
+# files into a staging directory and uploads only that directory. The list below
+# is an allowlist rather than a set of exclusions, because an exclusion list
+# publishes every file added after it was written. A document added to this
+# repository next year cannot reach the web unless somebody edits PUBLISH_FILES
+# on purpose.
+#
+# The site is a single self-contained index.html: no bundler, no package
+# install, no Node. Nothing here builds anything, because there is nothing to
+# build.
+
+name: Deploy site to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+# Read-only by default. The deploy job below adds the two permissions that
+# GitHub Pages requires, and no job holds a permission it does not use.
+permissions:
+  contents: read
+
+# One deployment at a time, and queued runs wait their turn instead of being
+# cancelled. Cancelling mid-deploy is how a site ends up half updated.
+concurrency:
+  group: github-pages
+  cancel-in-progress: false
+
+env:
+  # THE ALLOWLIST. Whitespace-separated paths, relative to the repository root.
+  # Everything that reaches jamesisme.com is named here. Nothing else ships.
+  #
+  # CUSTOM DOMAIN: jamesisme.com is set once in Settings then Pages, and for an
+  # Actions deployment that setting is the single source of truth for the
+  # domain. No CNAME file is committed, deliberately, so there is nothing that
+  # can disagree with it. If you would rather keep the domain in version
+  # control, create a CNAME file containing exactly jamesisme.com and add it to
+  # this list, then remove the domain from the settings form so the two cannot
+  # drift apart. Getting it wrong is not a soft failure: a CNAME naming a host
+  # that DNS does not point at takes the site off the air at the custom domain,
+  # and the TLS certificate for the wrong name cannot be issued, so visitors see
+  # a certificate warning rather than a 404.
+  PUBLISH_FILES: index.html
+
+jobs:
+  build:
+    name: Stage the publishable files
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # configure-pages only reads the Pages configuration here. Write access
+      # would be needed to have it switch Pages on for the repository, which is
+      # a one-time click that is better done deliberately in the settings.
+      pages: read
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+        with:
+          # This job never pushes, so it has no reason to leave a credential
+          # behind in the local git config where later steps could read it.
+          persist-credentials: false
+
+      - name: Read the Pages configuration
+        uses: actions/configure-pages@v6
+
+      - name: Stage only the allowlisted files
+        run: |
+          set -euo pipefail
+          rm -rf _site
+          mkdir -p _site
+          # Unquoted on purpose: PUBLISH_FILES is a list and word splitting is
+          # how it is read.
+          for f in $PUBLISH_FILES; do
+            if [ ! -f "$f" ]; then
+              echo "::error::allowlisted file is missing from the repository: $f"
+              exit 1
+            fi
+            install -D -m 644 "$f" "_site/$f"
+          done
+          echo "Staged for publication:"
+          find _site -type f | sort
+
+      - name: Verify that nothing beyond the allowlist was staged
+        run: |
+          set -euo pipefail
+          expected=$(printf '%s\n' $PUBLISH_FILES | sort)
+          found=$(cd _site && find . -type f -printf '%P\n' | sort)
+          if [ "$expected" != "$found" ]; then
+            echo "::error::staged output does not match the allowlist"
+            echo "allowlisted:"
+            printf '%s\n' "$expected"
+            echo "actually staged:"
+            printf '%s\n' "$found"
+            exit 1
+          fi
+          # The comparison above is already exact, so this second check is
+          # redundant by design. It is here because it states the boundary in
+          # the terms that actually matter, and it fails loudly if someone ever
+          # adds a document to the allowlist without thinking it through.
+          # Markdown in this repository is working material, not web content, so
+          # no .md file and nothing under docs/ is publishable. If that ever
+          # stops being true for one specific file, change this check on purpose
+          # rather than widening it.
+          if find _site \( -name '*.md' -o -path '*docs*' \) -print | grep -q .; then
+            echo "::error::markdown or a docs/ path reached the staging directory. Neither is web content in this repository."
+            exit 1
+          fi
+
+      - name: Upload the Pages artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: _site
+
+  deploy:
+    name: Deploy to GitHub Pages
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # Create the Pages deployment.
+      pages: write
+      # Let deploy-pages prove to Pages that the artifact came from this run.
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the artifact
+        id: deployment
+        uses: actions/deploy-pages@v5
