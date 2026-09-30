@@ -4,7 +4,7 @@
     "publicRepos": 97,
     "stars": {
       "vivari": 72,
-      "react-native-video-trim": 177,
+      "react-native-video-trim": 176,
       "react-native-loader-kit": 236,
       "react-native-shared-hero": 38,
       "react-native-signature-ink": 36,
@@ -23,29 +23,29 @@
   },
   "npm": {
     "period": "last-month",
-    "start": "2026-08-29",
-    "end": "2026-09-27",
+    "start": "2026-08-30",
+    "end": "2026-09-28",
     "downloads": {
-      "node-scp": 103430,
-      "react-native-video-trim": 71300,
-      "react-native-loader-kit": 15231,
-      "react-native-shared-hero": 247,
-      "react-native-signature-ink": 3303,
-      "react-native-waveform-player": 3926,
-      "react-native-waveform-recorder": 1876,
-      "react-native-pointer-location": 1055,
-      "react-native-zalo-kit": 650,
-      "react-native-textflow": 50,
-      "react-native-new-feature": 22,
-      "react-native-tooltipster": 23,
-      "react-native-motion-splash": 26,
-      "vivari": 26,
-      "socket.io-mesh-adapter": 31
+      "node-scp": 115496,
+      "react-native-video-trim": 79182,
+      "react-native-loader-kit": 16919,
+      "react-native-shared-hero": 265,
+      "react-native-signature-ink": 3598,
+      "react-native-waveform-player": 4196,
+      "react-native-waveform-recorder": 2099,
+      "react-native-pointer-location": 1253,
+      "react-native-zalo-kit": 741,
+      "react-native-textflow": 58,
+      "react-native-new-feature": 24,
+      "react-native-tooltipster": 25,
+      "react-native-motion-splash": 28,
+      "vivari": 28,
+      "socket.io-mesh-adapter": 33
     }
   },
   "viblo": {
     "posts": 88,
-    "views": 1040733,
+    "views": 1040802,
     "followers": 2905,
     "claps": 5367,
     "latest": "2025-04-12",
@@ -55,7 +55,7 @@
         "title": "Con đường mình trở thành Software Engineer ở Singapore",
         "url": "https://viblo.asia/p/con-duong-minh-tro-thanh-software-engineer-o-singapore-bJzKmaoDK9N",
         "claps": 234,
-        "views": 16097,
+        "views": 16103,
         "published": "2021-01-03"
       },
       {
@@ -63,7 +63,7 @@
         "title": "Trải nghiệm phỏng vấn Software Engineer của mình tại TikTok Singapore",
         "url": "https://viblo.asia/p/trai-nghiem-phong-van-software-engineer-cua-minh-tai-tiktok-singapore-aAY4q2zKJPw",
         "claps": 177,
-        "views": 11796,
+        "views": 11801,
         "published": "2024-02-15"
       },
       {
@@ -71,7 +71,7 @@
         "title": "Nhập môn CICD với Gitlab",
         "url": "https://viblo.asia/p/nhap-mon-cicd-voi-gitlab-07LKX9WPZV4",
         "claps": 195,
-        "views": 61816,
+        "views": 61822,
         "published": "2020-07-31"
       },
       {
@@ -87,10 +87,10 @@
         "title": "Nâng cao chất lượng code và hiệu quả làm việc nhóm với Husky, Lint-Staged, CommitLint",
         "url": "https://viblo.asia/p/nang-cao-chat-luong-code-va-hieu-qua-lam-viec-nhom-voi-husky-lint-staged-commitlint-4dbZNnMnZYM",
         "claps": 168,
-        "views": 37278,
+        "views": 37279,
         "published": "2020-10-11"
       }
     ]
   },
-  "asOf": "2026-09-29"
+  "asOf": "2026-09-30"
 }
