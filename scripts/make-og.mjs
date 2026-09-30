@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Renders public/og/{en,vi}.png (1200×630) from an HTML template with the
+// Renders public/og/{en,vi}.jpg (1200×630) from an HTML template with the
 // local Chromium used by the smoke test. Run after changing the headline.
 //   CHROMIUM_PATH=/path/to/chrome npm run og
 import { mkdir, readFile } from 'node:fs/promises';
@@ -23,8 +23,8 @@ const headline = (l) => block.match(new RegExp(`${l}:\\s*'([^']+)'`))[1];
 const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
 
 const copy = {
-  en: { name: 'Duc Trung Mai', head: headline('en'), role: 'Software engineer · native, runtime, frames', l: ['UI', 'React Native', 'Swift · Kotlin', 'C · Rust → Wasm', 'GPU · frames'] },
-  vi: { name: 'Mai Trung Đức', head: headline('vi'), role: 'Kỹ sư phần mềm · native, runtime, khung hình', l: ['UI', 'React Native', 'Swift · Kotlin', 'C · Rust → Wasm', 'GPU · khung hình'] },
+  en: { name: 'Duc Trung Mai', head: headline('en'), role: 'Software engineer · native, runtime, rendering', l: ['UI', 'React Native', 'Swift · Kotlin', 'C · Rust → Wasm', 'GPU · rendering'] },
+  vi: { name: 'Mai Trung Đức', head: headline('vi'), role: 'Kỹ sư phần mềm · native, runtime, rendering', l: ['UI', 'React Native', 'Swift · Kotlin', 'C · Rust → Wasm', 'GPU · rendering'] },
 };
 const acc = ['#f5a524', '#38bdf8', '#a78bfa', '#34d399', '#fb7185'];
 
@@ -60,7 +60,8 @@ const page = await browser.newPage({ viewport: { width: 1200, height: 630 }, dev
 for (const [lang, c] of Object.entries(copy)) {
   await page.setContent(html(c, lang), { waitUntil: 'load' });
   await page.evaluate(() => document.fonts.ready);
-  await page.screenshot({ path: join(out, `${lang}.png`), type: 'png' });
-  console.log(`og/${lang}.png`);
+  // JPEG keeps each card near 100 KB; WhatsApp drops og:image previews above ~300 KB.
+  await page.screenshot({ path: join(out, `${lang}.jpg`), type: 'jpeg', quality: 90 });
+  console.log(`og/${lang}.jpg`);
 }
 await browser.close();

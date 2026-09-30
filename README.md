@@ -5,7 +5,7 @@
 </div>
 
 Source of [ducmai.me](https://ducmai.me): "Layer Dive". The page is a stack of five layers, from the
-UI down to frames, and scrolling moves you down through them.
+UI down to GPU rendering, and scrolling moves you down through them.
 
 | Layer | Section | Stack |
 | --- | --- | --- |
@@ -13,7 +13,7 @@ UI down to frames, and scrolling moves you down through them.
 | L1 | Now | React Native |
 | L2 | Native | Swift, Kotlin |
 | L3 | Runtime | C, Rust to Wasm |
-| L4 | Lab | GPU, frames |
+| L4 | Lab | GPU, rendering |
 
 Writing, the career timeline and contact sit below L4.
 
@@ -59,7 +59,7 @@ src/
   styles/global.css
 scripts/
   fetch-stats.mjs        build-time GitHub, npm and Viblo numbers
-  make-og.mjs            renders public/og/{en,vi}.png
+  make-og.mjs            renders public/og/{en,vi}.jpg
   smoke.mjs              Playwright smoke test
 ```
 

@@ -27,7 +27,7 @@ const meta = LOCALE_META[locale];
 const title = Astro.props.title ?? t.meta.title;
 const description = Astro.props.description ?? t.meta.description;
 const canonical = new URL(meta.path, site).href;
-const ogImage = `${site}/og/${locale}.png`;
+const ogImage = `${site}/og/${locale}.jpg`;
 
 const client = clientStrings(t, locale, {
   line: [
@@ -47,7 +47,7 @@ const jsonLd = {
       name: 'Duc Trung Mai',
       alternateName: ['Duc Mai', 'Mai Trung Đức'],
       url: `${site}/`,
-      image: `${site}/og/en.png`,
+      image: `${site}/og/en.jpg`,
       jobTitle: 'Software Engineer',
       worksFor: { '@type': 'Organization', name: 'TikTok' },
       address: { '@type': 'PostalAddress', addressLocality: 'Singapore', addressCountry: 'SG' },
@@ -107,6 +107,7 @@ const prefsScript = `(function(){var d=document.documentElement,mm=function(q){r
     <meta property="og:title" content={`${t.meta.name}: ${HEADLINE[locale]}`} />
     <meta property="og:description" content={description} />
     <meta property="og:image" content={ogImage} />
+    <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={t.meta.ogAlt} />

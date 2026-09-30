@@ -6,7 +6,7 @@ export const vi: Dict = {
     title: 'Mai Trung Đức · native module, runtime trên trình duyệt, ở tầng bên dưới',
     description:
       'Kỹ sư phần mềm tại TikTok Search, Singapore. Native module cho React Native, vivari (Node, npm và dev server ngay trong tab trình duyệt) và công cụ hệ thống, đều mã nguồn mở.',
-    ogAlt: 'Mai Trung Đức, ducmai.me: năm tầng phát sáng xếp chồng, từ UI xuống tới khung hình GPU.',
+    ogAlt: 'Mai Trung Đức, ducmai.me: năm tầng phát sáng xếp chồng, từ UI xuống tới GPU rendering.',
   },
   nav: {
     skip: 'Bỏ qua, tới nội dung chính',
@@ -33,7 +33,7 @@ export const vi: Dict = {
     { id: 'now', code: 'L1', name: 'TS · Lynx · React', tech: 'component · bridge', section: 'Hiện tại' },
     { id: 'native', code: 'L2', name: 'Swift · Kotlin', tech: 'view · thread', section: 'Native' },
     { id: 'runtime', code: 'L3', name: 'C · Rust → Wasm', tech: 'syscall · bộ nhớ', section: 'Runtime' },
-    { id: 'frames', code: 'L4', name: 'GPU · khung hình', tech: 'vsync · ngân sách', section: 'Khung hình' },
+    { id: 'frames', code: 'L4', name: 'GPU · rendering', tech: 'vsync · ngân sách', section: 'Rendering' },
   ],
   depth: { label: 'Độ sâu', jump: (name: string) => `Nhảy tới ${name}` },
   hero: {

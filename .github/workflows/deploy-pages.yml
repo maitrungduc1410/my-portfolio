@@ -53,15 +53,15 @@ env:
   # custom domain, and the TLS certificate for the wrong name cannot be issued,
   # so visitors see a certificate warning rather than a 404.
   PUBLISH_PATTERNS: >-
-    *.html _astro/*.js _astro/*.css fonts/*.woff2 og/*.png *.svg *.webp
+    *.html _astro/*.js _astro/*.css fonts/*.woff2 og/*.jpg *.svg *.webp
     apple-touch-icon.png
     sitemap.xml robots.txt
-  # Files that must exist in every build. og/*.png are the social cards named
+  # Files that must exist in every build. og/*.jpg are the social cards named
   # by absolute URL in the og:image tags, so a missing one renders an empty
   # card on every shared link rather than failing anywhere visible.
   REQUIRED_FILES: >-
     index.html vi/index.html 404.html sitemap.xml robots.txt
-    og/en.png og/vi.png apple-touch-icon.png
+    og/en.jpg og/vi.jpg apple-touch-icon.png
 
 jobs:
   build:

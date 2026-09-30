@@ -8,7 +8,7 @@ export const en = {
     title: 'Duc Trung Mai · native modules, browser runtimes, one layer below',
     description:
       'Software engineer at TikTok Search, Singapore. Open source React Native modules, vivari (Node, npm and dev servers in a browser tab) and systems tooling.',
-    ogAlt: 'Duc Trung Mai, ducmai.me: a stack of five glowing layers from UI down to GPU frames.',
+    ogAlt: 'Duc Trung Mai, ducmai.me: a stack of five glowing layers from UI down to GPU rendering.',
   },
   nav: {
     skip: 'Skip to content',
@@ -35,7 +35,7 @@ export const en = {
     { id: 'now', code: 'L1', name: 'TS · Lynx · React', tech: 'components · bridges', section: 'Now' },
     { id: 'native', code: 'L2', name: 'Swift · Kotlin', tech: 'views · threads', section: 'Native' },
     { id: 'runtime', code: 'L3', name: 'C · Rust → Wasm', tech: 'syscalls · memory', section: 'Runtime' },
-    { id: 'frames', code: 'L4', name: 'GPU · frames', tech: 'vsync · budgets', section: 'Frames' },
+    { id: 'frames', code: 'L4', name: 'GPU · rendering', tech: 'vsync · budgets', section: 'Rendering' },
   ],
   depth: { label: 'Depth', jump: (name: string) => `Jump to ${name}` },
   hero: {
