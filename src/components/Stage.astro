@@ -1,0 +1,20 @@
+---
+import { useI18n, type Locale } from '../i18n';
+interface Props { locale: Locale }
+const { t } = useI18n(Astro.props.locale);
+// Rendered top-down on screen: L0 is the top slab, so it comes last in the DOM
+// (highest translateZ) and peels away first while diving.
+const layers = [...t.layers].map((l, i) => ({ ...l, i })).reverse();
+---
+
+<div class="stage" id="stage" data-mode="css" aria-hidden="true">
+  <div class="cstack-wrap">
+    <div class="cstack" id="cstack">
+      {layers.map((l) => (
+        <div class="cl" data-l={l.i} style={`--i:${4 - l.i};--c:var(--l${l.i})`}>
+          {l.code}<i>{l.name}</i>
+        </div>
+      ))}
+    </div>
+  </div>
+</div>

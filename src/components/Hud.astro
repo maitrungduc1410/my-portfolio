@@ -1,0 +1,25 @@
+---
+import { useI18n, type Locale } from '../i18n';
+interface Props { locale: Locale }
+const { t } = useI18n(Astro.props.locale);
+---
+
+<aside class="hud" id="hud" hidden data-mini aria-label={t.nav.hud.label}>
+  <div class="hud__h">
+    <button class="hud__t" type="button" aria-expanded="false" aria-controls="hud-body" data-hud-expand><span>{t.hud.title}</span><b id="hud-mini">-</b></button>
+    <button class="hud__x" type="button" data-action="hud" aria-label={t.hud.close}>×</button>
+  </div>
+  <div id="hud-body">
+  <div class="hud__g">
+    <div><b id="hud-fps">-</b>{t.hud.fps}</div>
+    <div><b id="hud-p95">-</b>{t.hud.p95}</div>
+    <div><b id="hud-hz">-</b>{t.hud.hz}</div>
+    <div><b id="hud-q">{t.hud.tiers.loading}</b>{t.hud.quality}</div>
+  </div>
+  <canvas id="hud-cv" aria-hidden="true"></canvas>
+  <div class="hud__f">
+    <small>{t.hud.caption}</small>
+    <button class="tbtn" type="button" id="hud-jank" aria-pressed="false">{t.hud.jank}</button>
+  </div>
+  </div>
+</aside>

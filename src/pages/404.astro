@@ -1,0 +1,22 @@
+---
+import Base from '../layouts/Base.astro';
+import { LOCALES, LOCALE_META, useI18n } from '../i18n';
+const { t } = useI18n('en');
+---
+
+<Base locale="en" title={`404 · ${t.notFound.title}`} noindex>
+  <section class="hero wrap" id="top" data-sec="0">
+    <div class="hero__copy">
+      <p class="eyebrow">404 · L5</p>
+      <h1>{t.notFound.title}</h1>
+      <p class="lede">{t.notFound.body}</p>
+      <div class="cta">
+        {LOCALES.map((l) => (
+          <a class={l === 'en' ? 'btn btn--p' : 'btn'} href={LOCALE_META[l].path} lang={LOCALE_META[l].htmlLang}>
+            {useI18n(l).t.notFound.home}
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+</Base>

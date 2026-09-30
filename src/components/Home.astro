@@ -1,0 +1,428 @@
+---
+import { useI18n, type Locale } from '../i18n';
+import { HEADLINE } from '../config/headline';
+import { stats, totalDownloads, nativeDownloads, totalStars, stars, downloads } from '../data/stats';
+import { EMAIL, LAB, NATIVE_FAMILY, SOCIAL, repo } from '../data/projects';
+import Star from './Star.astro';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const { t, num, date } = useI18n(locale);
+
+const headline = HEADLINE[locale];
+const cut = headline.lastIndexOf(' ');
+const [hHead, hTail] = cut > 0 ? [headline.slice(0, cut + 1), headline.slice(cut + 1)] : ['', headline];
+
+const approx = (n: number) => num(Math.round(n / 1000) * 1000);
+const asOf = date(stats.asOf);
+const loaders = ['pulse', 'dots', 'ring', 'bars', 'grid', 'orbit', 'square', 'wave'];
+const loaderDots: Record<string, number> = { pulse: 1, dots: 3, ring: 1, bars: 4, grid: 9, orbit: 3, square: 1, wave: 4 };
+const loaderNames: Record<string, string> = {
+  pulse: 'BallScale', dots: 'BallPulseSync', ring: 'CircleStrokeSpin', bars: 'LineScale',
+  grid: 'BallGridPulse', orbit: 'BallClipRotate', square: 'SquareSpin', wave: 'BallBeat',
+};
+const L = (i: number) => t.layers[i];
+const heroHues = [32, 196, 150, 178, 12, 222];
+---
+
+<!-- ================= L0 · SURFACE ================= -->
+<section class="hero wrap" id="top" data-sec="0">
+  <div class="hero__copy">
+    <p class="eyebrow">{t.hero.eyebrow}</p>
+    <h1>{hHead}<span class="grad">{hTail}</span></h1>
+    <p class="lede" set:html={t.hero.lede(approx(totalDownloads))} />
+    <div class="cta">
+      <a class="btn btn--p" href="#now">{t.hero.ctaDive}
+        <svg viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v10M3.5 8.5 8 13l4.5-4.5"/></svg>
+      </a>
+      <button class="btn" type="button" data-action="palette">{t.hero.ctaPalette} <kbd data-kbd>⌘K</kbd></button>
+    </div>
+    <p class="hero__scroll"><i aria-hidden="true"></i>{t.hero.scroll}</p>
+  </div>
+  <div aria-label={t.numbers.label} role="group">
+    <div class="numbers">
+      <div><b data-count={totalDownloads}>{num(totalDownloads)}</b><span>{t.numbers.installs}</span></div>
+      <div><b data-count={totalStars}>{num(totalStars)}</b><span>{t.numbers.stars}</span></div>
+      <div><b data-count={stats.github.followers}>{num(stats.github.followers)}</b><span>{t.numbers.followers}</span></div>
+      <div><b data-count={stats.viblo.views}>{num(stats.viblo.views)}</b><span>{t.numbers.views(String(stats.viblo.posts))}</span></div>
+    </div>
+    <p class="asof">{t.numbers.asOf(asOf)}</p>
+  </div>
+</section>
+
+<!-- ================= L1 · NOW ================= -->
+<section class="sec wrap" id="now" data-sec="1" data-layer="1">
+  <div class="sec__h rv">
+    <p class="tag">{L(1).code} · {L(1).name}</p>
+    <h2>{t.now.title}</h2>
+    <p class="lede">{t.now.lede}</p>
+  </div>
+  <div class="grid g4 rv">
+    {t.now.cards.map((c, i) => (
+      <article class="card card--hover">
+        <p class="card__k">{c.k}</p>
+        <h3>{i === 1 ? <a class="ext" href={SOCIAL.lynx} rel="noopener">{c.title}</a> : c.title}</h3>
+        <p>{c.body}</p>
+      </article>
+    ))}
+  </div>
+  <div class="agents rv">
+    <figure class="card loop" style="margin:0">
+      <svg viewBox="0 0 420 180" role="img" aria-label={t.now.agents.steps.join(' → ')} id="agent-loop">
+        <path class="edge" id="loop-path" d="M70 50 H350 Q380 50 380 90 Q380 130 350 130 H70 Q40 130 40 90 Q40 50 70 50 Z" />
+        {t.now.agents.steps.map((s, i) => {
+          const pos = [[70, 50], [350, 50], [350, 130], [70, 130]][i];
+          return (
+            <g class="node" data-step={i} transform={`translate(${pos[0] - 44} ${pos[1] - 17})`}>
+              <rect width="88" height="34" rx="9" />
+              <text x="44" y="22" text-anchor="middle">{s}</text>
+            </g>
+          );
+        })}
+        <circle class="pulse" r="4" id="loop-dot" cx="70" cy="50" />
+      </svg>
+      <figcaption class="muted" style="font-size:13.5px">{t.now.agents.caption}</figcaption>
+    </figure>
+    <div class="tools">
+      <p class="card__k" style="margin:0">{t.now.toolsTitle}</p>
+      <article class="card card--hover">
+        <h3><a class="ext" href={repo('konva-inspector')} rel="noopener">konva-inspector</a></h3>
+        <p>{t.now.konva}</p>
+        <ul class="chips" style="margin-top:12px"><li class="chip">{num(stars('konva-inspector') ?? 0)} <Star label={t.native.stars} /></li><li class="chip">Chrome · Firefox · Edge</li></ul>
+      </article>
+      <article class="card card--hover">
+        <p class="card__k">{t.now.scpTitle}</p>
+        <h3><a class="ext" href={repo('node-scp-async')} rel="noopener">node-scp</a></h3>
+        <p>{t.now.scp}</p>
+        <div class="metric"><b>{num(downloads('node-scp') ?? 0)}</b><span>{t.native.installsMonth}</span></div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ================= L2 · NATIVE ================= -->
+<section class="sec wrap" id="native" data-sec="2" data-layer="2">
+  <div class="sec__h rv">
+    <p class="tag">{L(2).code} · {L(2).name}</p>
+    <h2>{t.native.title}</h2>
+    <p class="lede">{t.native.lede(num(nativeDownloads))}</p>
+  </div>
+  <div class="grid g2 rv">
+    <article class="card card--hover">
+      <p class="card__k">Swift · Kotlin · FFmpeg</p>
+      <h3><a class="ext" href={repo('react-native-video-trim')} rel="noopener">react-native-video-trim</a></h3>
+      <div class="metric"><b>{num(downloads('react-native-video-trim') ?? 0)}</b><span>{t.native.installsMonth} · {num(stars('react-native-video-trim') ?? 0)} <Star label={t.native.stars} /></span></div>
+      <p>{t.native.videoTrim}</p>
+    </article>
+    <article class="card card--hover">
+      <p class="card__k">Swift · Kotlin · Fabric</p>
+      <h3><a class="ext" href={repo('react-native-shared-hero')} rel="noopener">react-native-shared-hero</a></h3>
+      <div class="metric"><b>{num(stars('react-native-shared-hero') ?? 0)}</b><span>{t.native.stars}</span></div>
+      <p>{t.native.sharedHero}</p>
+      <blockquote class="pq">{t.native.sharedHeroQuote}</blockquote>
+    </article>
+  </div>
+
+  <h3 class="rv" style="margin:44px 0 6px;font-size:20px">{t.native.playground}</h3>
+  <p class="muted rv" style="margin-bottom:18px;font-size:14px">{t.native.playgroundNote}</p>
+  <div class="grid g2 rv">
+    <div class="demo" data-demo="hero">
+      <div class="demo__bar"><h3>{t.demos.hero.title}</h3><a class="ext" href={repo(t.demos.hero.pkg)} rel="noopener">{t.demos.hero.pkg}</a></div>
+      <div class="demo__body sh">
+        <div class="sh__phone">
+          <div class="sh__scr">
+            <div class="sh__list">
+              <p class="sh__bar" aria-hidden="true"><span>9:41</span><i></i></p>
+              <p class="sh__h">{t.demos.hero.screen}</p>
+              <div class="sh__grid">
+                {t.demos.hero.items.map((name, i) => (
+                  <button type="button" class="sh__tile" data-sh-tile data-name={name} style={`--h:${heroHues[i]}`}>
+                    <span class="sh__art" aria-hidden="true"></span>
+                    <span class="sh__cap">{name}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div class="sh__detail" style="opacity:0;visibility:hidden" inert>
+              <div class="sh__hero sh__art" style={`--h:${heroHues[0]}`}></div>
+              <button type="button" class="sh__back" data-sh-back aria-label={t.demos.hero.back}>
+                <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true"><path d="M10 3 5 8l5 5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" /></svg>
+              </button>
+              <div class="sh__body">
+                <p class="sh__t" data-sh-title>{t.demos.hero.items[0]}</p>
+                <p class="sh__m" data-sh-meta>places::0</p>
+                <i></i><i></i><i></i>
+                <p class="sh__drag">{t.demos.hero.drag}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="demo__foot">
+        <div class="demo__ctl">
+          <span class="seg" role="group" aria-label={t.demos.hero.style}>
+            <button class="tbtn" type="button" aria-pressed="true" data-sh-opt="mode:snapshot">snapshot</button><button class="tbtn" type="button" aria-pressed="false" data-sh-opt="mode:morph">morph</button>
+          </span>
+          <span class="seg" role="group" aria-label={t.demos.hero.timing}>
+            <button class="tbtn" type="button" aria-pressed="true" data-sh-opt="timing:spring">spring</button><button class="tbtn" type="button" aria-pressed="false" data-sh-opt="timing:duration">duration</button>
+          </span>
+          <span class="seg" role="group" aria-label={t.demos.hero.path}>
+            <button class="tbtn" type="button" aria-pressed="true" data-sh-opt="path:linear">linear</button><button class="tbtn" type="button" aria-pressed="false" data-sh-opt="path:arc">arc</button>
+          </span>
+        </div>
+        <span>{t.demos.hero.hint}</span>
+      </div>
+    </div>
+
+    <div class="demo" data-demo="loaders">
+      <div class="demo__bar"><h3>{t.demos.loaders.title}</h3><a class="ext" href={repo(t.demos.loaders.pkg)} rel="noopener">{t.demos.loaders.pkg}</a></div>
+      <div class="demo__body">
+        <div class="loaders">
+          {loaders.map((k, i) => (
+            <button type="button" class={`ld ld-${k}`} aria-pressed={i === 0 ? 'true' : 'false'} data-name={loaderNames[k]} aria-label={loaderNames[k]}>
+              <span>{Array.from({ length: loaderDots[k] }).map(() => <i />)}</span>
+            </button>
+          ))}
+        </div>
+        <p class="loaders__name" data-loader-name aria-live="polite">{loaderNames.pulse}</p>
+      </div>
+      <div class="demo__foot">
+        <div class="demo__ctl"><label>{t.demos.loaders.speed} <input type="range" min="0.25" max="2.5" step="0.05" value="1" data-k="speed" /></label></div>
+        <span>{t.demos.loaders.hint}</span>
+      </div>
+    </div>
+
+    <div class="demo" data-demo="wave">
+      <div class="demo__bar"><h3>{t.demos.wave.title}</h3><a class="ext" href={repo(t.demos.wave.pkg)} rel="noopener">{t.demos.wave.pkg}</a></div>
+      <div class="demo__body">
+        <div class="wave">
+          <div class="wave__cv" tabindex="0" role="slider" aria-label={t.demos.wave.title} aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-wave-cv><canvas></canvas></div>
+          <div class="wave__row">
+            <button class="tbtn" type="button" data-wave-play>{t.demos.wave.play}</button>
+            <span data-wave-time>0:00 / 0:24</span>
+          </div>
+        </div>
+      </div>
+      <div class="demo__foot"><span>{t.demos.wave.hint}</span></div>
+    </div>
+
+    <div class="demo" data-demo="ink">
+      <div class="demo__bar"><h3>{t.demos.ink.title}</h3><a class="ext" href={repo(t.demos.ink.pkg)} rel="noopener">{t.demos.ink.pkg}</a></div>
+      <div class="demo__body">
+        <p class="ink__ph" data-ink-ph>{t.demos.ink.empty}</p>
+        <canvas class="ink__cv" data-ink-cv aria-label={t.demos.ink.hint}></canvas>
+      </div>
+      <div class="demo__foot">
+        <div class="demo__ctl">
+          <button class="tbtn" type="button" data-ink="undo">{t.demos.ink.undo}</button>
+          <button class="tbtn" type="button" data-ink="clear">{t.demos.ink.clear}</button>
+          <button class="tbtn" type="button" data-ink="save">{t.demos.ink.save}</button>
+        </div>
+        <span>{t.demos.ink.hint}</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="rv" style="margin-top:36px">
+    <p class="card__k">{t.native.familyTitle}</p>
+    <ul class="chips">
+      {NATIVE_FAMILY.map((n) => (
+        <li><a class="chip" href={repo(n)} rel="noopener"><span><span class="muted">react-native-</span>{n.replace('react-native-', '')}</span><small>{num(downloads(n) ?? 0)}{t.native.perMonth}</small></a></li>
+      ))}
+    </ul>
+  </div>
+</section>
+
+<!-- ================= L3 · RUNTIME ================= -->
+<section class="sec wrap" id="runtime" data-sec="3" data-layer="3">
+  <div class="sec__h rv">
+    <p class="tag">{L(3).code} · {L(3).name}</p>
+    <h2>{t.runtime.title}</h2>
+    <p class="lede">{t.runtime.lede}</p>
+  </div>
+  <div class="grid g2 rv">
+    <article class="card card--hover">
+      <p class="card__k">TypeScript · Rust/Wasm · MIT</p>
+      <h3><a class="ext" href={repo('vivari')} rel="noopener">vivari</a></h3>
+      <div class="metric"><b>{num(stars('vivari') ?? 0)}</b><span>{t.native.stars}</span></div>
+      <p>{t.runtime.vivari}</p>
+      <blockquote class="pq">{t.runtime.vivariQuote}<cite>{t.runtime.vivariCite}</cite></blockquote>
+      <p class="how">{t.runtime.vivariHow}</p>
+      <p style="margin-top:18px"><a class="btn btn--p" href={SOCIAL.vivari} rel="noopener">{t.runtime.boot} <span aria-hidden="true">↗</span></a></p>
+    </article>
+    <div class="demo" data-demo="vivari">
+      <div class="demo__bar"><h3>{t.demos.vivari.title}</h3><a class="ext" href={repo('vivari')} rel="noopener">vivari</a></div>
+      <div class="demo__body vv">
+        <div class="vv__top">
+          <span class="seg" role="group" aria-label={t.demos.vivari.template}>
+            <button class="tbtn" type="button" aria-pressed="true" data-vv-tpl="react">Vite + React</button><button class="tbtn" type="button" aria-pressed="false" data-vv-tpl="express">Express</button><button class="tbtn" type="button" aria-pressed="false" data-vv-tpl="python">Python</button>
+          </span>
+          <button class="tbtn vv__off" type="button" aria-pressed="false" data-vv-offline>
+            <svg viewBox="0 0 16 16" width="13" height="13" fill="currentColor" aria-hidden="true"><path d="M15 9.2v-1.3L9.4 4.6V1.8a1.4 1.4 0 0 0-2.8 0v2.8L1 7.9v1.3l5.6-1.6v2.9l-1.7 1.3V13l2.1-.6 2.1.6v-1.2l-1.7-1.3V7.6Z"/></svg>
+            {t.demos.vivari.offline}
+          </button>
+        </div>
+        <div class="vv__win">
+          <div class="vv__chrome" aria-hidden="true">
+            <i></i><i></i><i></i>
+            <span class="vv__url"><b data-vv-url>localhost:5173</b></span>
+            <span class="vv__plane">✈</span>
+          </div>
+          <div class="vv__split">
+            <div class="vv__term" role="log" aria-live="polite" aria-label="Terminal" tabindex="0" data-vv-term><p class="vv__dim">{t.demos.vivari.idle}</p></div>
+            <div class="vv__prev" data-vv-prev>
+              <div class="vv__empty" data-vv-empty>
+                <p>{t.demos.vivari.empty}</p>
+                <button class="btn btn--p vv__go" type="button" data-vv-start>
+                  <svg viewBox="0 0 16 16" width="12" height="12" fill="currentColor" aria-hidden="true"><path d="M4 2.5v11l9-5.5Z"/></svg>
+                  <span>{t.demos.vivari.start}</span>
+                </button>
+              </div>
+              <div class="vv__app" data-vv-app hidden></div>
+            </div>
+          </div>
+          <label class="vv__edit" data-vv-edit>
+            <span class="vv__file" data-vv-file>src/App.jsx</span>
+            <code><span data-vv-pre>&lt;h1&gt;</span><input type="text" data-vv-input value={t.demos.vivari.hello} maxlength="40" spellcheck="false" disabled aria-label={t.demos.vivari.edit} /><span data-vv-post>&lt;/h1&gt;</span></code>
+          </label>
+        </div>
+        <div class="vv__meter" aria-live="polite">
+          <span class="vv__zero"><b>0</b> {t.demos.vivari.servers}</span>
+          <span class="vv__msg" data-vv-msg data-on={t.demos.vivari.inTab} data-off={t.demos.vivari.offlineMsg}>{t.demos.vivari.inTab}</span>
+          <span class="vv__served"><b data-vv-served>0</b> {t.demos.vivari.served}</span>
+        </div>
+      </div>
+      <div class="demo__foot">
+        <a class="btn btn--p vv__cta" href="https://vivari.run/studio/" target="_blank" rel="noopener">{t.demos.vivari.cta} <span aria-hidden="true">↗</span></a>
+        <span>{t.demos.vivari.sim}</span>
+      </div>
+    </div>
+
+    <article class="card card--hover">
+      <p class="card__k">TypeScript · Kubernetes · Grafana</p>
+      <h3><a class="ext" href={repo('socket.io-mesh-adapter')} rel="noopener">socket.io-mesh-adapter</a></h3>
+      <div class="metric"><b>300k</b><span>{t.runtime.meshMetric}</span></div>
+      <p>{t.runtime.mesh}</p>
+      <p class="card__k" style="margin-top:22px">{t.runtime.alsoTitle}</p>
+      <ul class="chips">
+        {Object.entries(t.runtime.also).map(([r, d]) => <li><a class="chip" href={repo(r)} rel="noopener" title={d}>{r}</a></li>)}
+      </ul>
+    </article>
+    <div class="demo" data-demo="mesh">
+      <div class="demo__bar"><h3>{t.demos.mesh.title}</h3><a class="ext" href={repo(t.demos.mesh.pkg)} rel="noopener">{t.demos.mesh.pkg}</a></div>
+      <div class="demo__body" style="min-height:320px">
+        <canvas class="mesh__cv" data-mesh-cv aria-hidden="true"></canvas>
+        <div class="mesh__stat" aria-live="polite">
+          <span><b data-mesh-links>0</b> {t.demos.mesh.links}</span>
+          <span><b data-mesh-hops>0</b> {t.demos.mesh.hops}</span>
+        </div>
+      </div>
+      <div class="demo__foot">
+        <div class="demo__ctl">
+          <button class="tbtn" type="button" aria-pressed="true" data-mesh-mode="mesh">{t.demos.mesh.meshMode}</button>
+          <button class="tbtn" type="button" aria-pressed="false" data-mesh-mode="broker">{t.demos.mesh.broker}</button>
+          <label><input type="range" min="3" max="12" value="6" data-k="nodes" /> <span data-mesh-n>6</span> {t.demos.mesh.nodes}</label>
+          <button class="tbtn" type="button" data-mesh-emit>{t.demos.mesh.emit}</button>
+        </div>
+        <span>{t.demos.mesh.hint}</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= L4 · FRAMES: LAB ================= -->
+<section class="sec wrap" id="lab" data-sec="4" data-layer="4">
+  <div class="sec__h rv">
+    <p class="tag">{L(4).code} · {L(4).name}</p>
+    <h2>{t.lab.title}</h2>
+    <p class="lede">{t.lab.lede}</p>
+  </div>
+  <div class="filters rv" role="group" aria-label={t.lab.filter}>
+    <button type="button" aria-pressed="true" data-filter="all">{t.lab.all}</button>
+    {[1, 2, 3, 4].map((i) => <button type="button" aria-pressed="false" data-filter={i} style={`--c:var(--l${i})`}>{L(i).code} · {L(i).section}</button>)}
+  </div>
+  <div class="grid g4 labgrid rv">
+    {LAB.map((x) => (
+      <a class="card" href={repo(x.repo)} rel="noopener" data-lv={x.layer} style={`--c:var(--l${x.layer})`}>
+        <span class="lv">{L(x.layer).code} · {L(x.layer).section}</span>
+        <h3>{x.repo}</h3>
+        <p>{t.lab.items[x.repo as keyof typeof t.lab.items]}</p>
+      </a>
+    ))}
+  </div>
+</section>
+
+<!-- ================= WRITING ================= -->
+<section class="sec wrap" id="writing" data-sec="5" data-layer="4">
+  <div class="sec__h rv">
+    <p class="tag">Viblo · {t.writing.followers(num(stats.viblo.followers))}</p>
+    <h2>{t.writing.title}</h2>
+    <p class="lede">{t.writing.lede(String(stats.viblo.posts), num(stats.viblo.views), num(stats.viblo.claps), date(stats.viblo.latest))}</p>
+  </div>
+  <div class="grid g3 rv">
+    {stats.viblo.featured.map((p) => (
+      <a class="card wcard" href={p.url} rel="noopener">
+        <p class="m">{date(p.published)} · {num(p.claps)} {t.writing.claps} · {num(p.views)} {t.writing.views}</p>
+        <h3 lang="vi">{p.title}</h3>
+        <p>{t.writing.summaries[p.id]}</p>
+        <span class="go">{t.writing.read} →</span>
+      </a>
+    ))}
+    <a class="card wcard" href={SOCIAL.viblo} rel="noopener">
+      <p class="m">2018 - 2025 · {t.writing.posts(String(stats.viblo.posts))}</p>
+      <h3>{t.writing.archive}</h3>
+      <p>{t.writing.archiveBody}</p>
+      <span class="go">{t.writing.archiveCta} →</span>
+    </a>
+  </div>
+</section>
+
+<!-- ================= CAREER ================= -->
+<section class="sec wrap" id="career" data-sec="6" data-layer="4">
+  <div class="sec__h rv">
+    <p class="tag">2014 → 2026</p>
+    <h2>{t.career.title}</h2>
+    <p class="lede">{t.career.lede}</p>
+  </div>
+  <div class="tl rv" data-tl>
+    <ol class="tl__list" role="tablist" aria-orientation="vertical" aria-label={t.career.title}>
+      {t.career.items.map((c, i) => (
+        <li role="presentation">
+          <button class="tl__btn" type="button" role="tab" id={`tl-t${i}`} aria-controls={`tl-p${i}`} aria-selected={i === 0 ? 'true' : 'false'} tabindex={i === 0 ? 0 : -1}>
+            <time>{c.when}</time><b>{c.org}</b>
+          </button>
+        </li>
+      ))}
+    </ol>
+    <div>
+      {t.career.items.map((c, i) => (
+        <div class="card tl__panel" role="tabpanel" id={`tl-p${i}`} aria-labelledby={`tl-t${i}`} hidden={i !== 0}>
+          <time>{c.when}</time>
+          <h3>{c.org}</h3>
+          <p class="role">{c.role}</p>
+          <p>{c.detail}</p>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>
+
+<!-- ================= CONTACT ================= -->
+<section class="sec wrap sec--contact" id="contact" data-sec="7" data-layer="4">
+  <div class="sec__h rv">
+    <p class="tag">ducmai.me</p>
+    <h2>{t.contact.title}</h2>
+  </div>
+  <div class="links rv">
+    <div class="mailcard">
+      <a href={`mailto:${EMAIL}`}><b>{t.contact.email} ↗</b><span>{EMAIL}</span></a>
+      <button type="button" class="mailcard__copy" data-copy={EMAIL} aria-label={t.contact.copy} title={t.contact.copy}>
+        <svg viewBox="0 0 16 16" width="15" height="15" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><rect x="5.5" y="5.5" width="8" height="8" rx="1.8"/><path d="M10.5 3.5v-.3A1.7 1.7 0 0 0 8.8 1.5H3.2a1.7 1.7 0 0 0-1.7 1.7v5.6c0 .94.76 1.7 1.7 1.7h.3"/></svg>
+      </button>
+    </div>
+    <a href={SOCIAL.github} rel="me noopener"><b>GitHub ↗</b><span>{t.contact.followers(num(stats.github.followers))}</span></a>
+    <a href={SOCIAL.linkedin} rel="me noopener"><b>LinkedIn ↗</b><span>in/maitrungduc1410</span></a>
+    <a href={SOCIAL.x} rel="me noopener"><b>X ↗</b><span>@maitrungduc1410</span></a>
+    <a href={SOCIAL.viblo} rel="me noopener"><b>Viblo ↗</b><span>{t.contact.viblo}</span></a>
+  </div>
+</section>

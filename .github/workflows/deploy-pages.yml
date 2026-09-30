@@ -1,21 +1,23 @@
-# Publishes jamesisme.com to GitHub Pages.
+# Publishes ducmai.me to GitHub Pages.
 #
 # THE PUBLISH BOUNDARY, which is the part of this file worth reading twice.
 #
-# This workflow never uploads the repository root. It copies a named list of
-# files into a staging directory and uploads only that directory. The list is an
-# allowlist rather than a set of exclusions, because an exclusion list publishes
-# everything added after it was written, and a repository accumulates notes,
-# drafts and scratch files whether or not anyone planned for it.
+# This workflow never uploads the repository root, and it does not upload the
+# build output blindly either. Astro builds into dist/, and dist/ is copied
+# into a staging directory only after every file in it has matched an
+# allowlist of web asset types. The list is an allowlist rather than a set of
+# exclusions, because an exclusion list publishes everything added after it was
+# written, and a build accumulates source maps, stray notes and copied
+# fixtures whether or not anyone planned for it.
 #
-# Today the only two publishable files are index.html and og.png. The point of
-# the list is that this stays a decision instead of becoming a default: a file
-# added next year cannot reach the web until somebody edits PUBLISH_FILES on
-# purpose.
+# A file type that is not named in PUBLISH_PATTERNS fails the build instead of
+# shipping. Widening the list is a decision somebody makes on purpose, in this
+# file, in review.
 #
-# The site is a single self-contained index.html: no bundler, no package
-# install, no Node. Nothing here builds anything, because there is nothing to
-# build.
+# What gets built: a static Astro site in two locales (/ and /vi/). The
+# build also fetches public GitHub, npm and Viblo numbers; when a source is
+# unreachable it falls back to the snapshot committed in src/data, so a flaky
+# API delays nothing and never breaks the page.
 
 name: Deploy site to GitHub Pages
 
@@ -36,29 +38,36 @@ concurrency:
   cancel-in-progress: false
 
 env:
-  # THE ALLOWLIST. Whitespace-separated paths, relative to the repository root.
-  # Everything that reaches jamesisme.com is named here. Nothing else ships.
+  # THE ALLOWLIST. Whitespace-separated shell globs, matched against the path
+  # of every file in dist/ relative to dist/. Everything that reaches ducmai.me
+  # matches one of these. Nothing else ships.
   #
-  # CUSTOM DOMAIN: jamesisme.com is set once in Settings then Pages, and for an
+  # CUSTOM DOMAIN: ducmai.me is set once in Settings then Pages, and for an
   # Actions deployment that setting is the single source of truth for the
   # domain. No CNAME file is committed, deliberately, so there is nothing that
   # can disagree with it. If you would rather keep the domain in version
-  # control, create a CNAME file containing exactly jamesisme.com and add it to
-  # this list, then remove the domain from the settings form so the two cannot
-  # drift apart. Getting it wrong is not a soft failure: a CNAME naming a host
-  # that DNS does not point at takes the site off the air at the custom domain,
-  # and the TLS certificate for the wrong name cannot be issued, so visitors see
-  # a certificate warning rather than a 404.
-  # og.png is the social card promised by the og:image and twitter:card tags in
-  # the head. Those tags name an absolute URL, so if the file is not published
-  # every shared link renders an empty card.
-  PUBLISH_FILES: index.html og.png
+  # control, put a CNAME file containing exactly ducmai.me in public/ and add
+  # CNAME to this list, then remove the domain from the settings form so the
+  # two cannot drift apart. Getting it wrong is not a soft failure: a CNAME
+  # naming a host that DNS does not point at takes the site off the air at the
+  # custom domain, and the TLS certificate for the wrong name cannot be issued,
+  # so visitors see a certificate warning rather than a 404.
+  PUBLISH_PATTERNS: >-
+    *.html _astro/*.js _astro/*.css fonts/*.woff2 og/*.png *.svg *.webp
+    apple-touch-icon.png
+    sitemap.xml robots.txt
+  # Files that must exist in every build. og/*.png are the social cards named
+  # by absolute URL in the og:image tags, so a missing one renders an empty
+  # card on every shared link rather than failing anywhere visible.
+  REQUIRED_FILES: >-
+    index.html vi/index.html 404.html sitemap.xml robots.txt
+    og/en.png og/vi.png apple-touch-icon.png
 
 jobs:
   build:
-    name: Stage the publishable files
+    name: Build and stage the publishable files
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 10
     permissions:
       contents: read
       # configure-pages only reads the Pages configuration here. Write access
@@ -76,46 +85,71 @@ jobs:
       - name: Read the Pages configuration
         uses: actions/configure-pages@v6
 
-      - name: Stage only the allowlisted files
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install exact dependencies
+        run: npm ci
+
+      - name: Build
+        env:
+          # Only raises the GitHub API rate limit for the public stats fetch.
+          # The token is read-only (contents: read) and is never written out.
+          GITHUB_TOKEN: ${{ github.token }}
+        run: npm run build
+
+      - name: Stage only allowlisted files
         run: |
           set -euo pipefail
           rm -rf _site
           mkdir -p _site
-          # Unquoted on purpose: PUBLISH_FILES is a list and word splitting is
-          # how it is read.
-          for f in $PUBLISH_FILES; do
-            if [ ! -f "$f" ]; then
-              echo "::error::allowlisted file is missing from the repository: $f"
-              exit 1
+          rejected=0
+          while IFS= read -r -d '' path; do
+            rel=${path#dist/}
+            ok=0
+            # Unquoted on purpose: PUBLISH_PATTERNS is a list of globs and word
+            # splitting is how it is read. set -f stops the shell expanding the
+            # globs against the working directory.
+            set -f
+            for pat in $PUBLISH_PATTERNS; do
+              # shellcheck disable=SC2254
+              case "$rel" in $pat) ok=1; break ;; esac
+            done
+            set +f
+            if [ "$ok" = 1 ]; then
+              install -D -m 644 "$path" "_site/$rel"
+            else
+              echo "::error::not in the publish allowlist: $rel"
+              rejected=1
             fi
-            install -D -m 644 "$f" "_site/$f"
-          done
+          done < <(find dist -type f -print0)
+          [ "$rejected" = 0 ] || exit 1
           echo "Staged for publication:"
           find _site -type f | sort
 
-      - name: Verify that nothing beyond the allowlist was staged
+      - name: Verify the staged site
         run: |
           set -euo pipefail
-          expected=$(printf '%s\n' $PUBLISH_FILES | sort)
-          found=$(cd _site && find . -type f -printf '%P\n' | sort)
-          if [ "$expected" != "$found" ]; then
-            echo "::error::staged output does not match the allowlist"
-            echo "allowlisted:"
-            printf '%s\n' "$expected"
-            echo "actually staged:"
-            printf '%s\n' "$found"
-            exit 1
-          fi
-          # The comparison above is already exact, so this second check is
+          for f in $REQUIRED_FILES; do
+            if [ ! -f "_site/$f" ]; then
+              echo "::error::required file is missing from the build: $f"
+              exit 1
+            fi
+          done
+          # The allowlist above already excludes these, so this second check is
           # redundant by design. It is here because it states the boundary in
           # the terms that actually matter, and it fails loudly if someone ever
-          # adds a document to the allowlist without thinking it through.
+          # widens the allowlist without thinking it through.
           # Markdown here is working material, the README included, so no .md
-          # file and nothing under a docs/ path is publishable. If that ever
-          # stops being true for one specific file, change this check on purpose
-          # rather than widening it.
-          if find _site \( -name '*.md' -o -path '*docs*' \) -print | grep -q .; then
-            echo "::error::markdown or a docs/ path reached the staging directory. Neither is web content in this repository."
+          # file and nothing under a docs/ path is publishable. Source maps
+          # would publish the unminified source next to the bundle. If that
+          # ever stops being true for one specific file, change this check on
+          # purpose rather than widening it.
+          if find _site \( -name '*.md' -o -name '*.map' -o -path '*docs*' \) -print | grep -q .; then
+            echo "::error::markdown, a source map or a docs/ path reached the staging directory. None of them is web content in this repository."
             exit 1
           fi
 

@@ -1,0 +1,145 @@
+---
+import '../styles/global.css';
+import Nav from '../components/Nav.astro';
+import Stage from '../components/Stage.astro';
+import Depth from '../components/Depth.astro';
+import Palette from '../components/Palette.astro';
+import Hud from '../components/Hud.astro';
+import SoundHint from '../components/SoundHint.astro';
+import Footer from '../components/Footer.astro';
+import { LOCALES, LOCALE_META, useI18n, type Locale } from '../i18n';
+import { clientStrings } from '../i18n/client';
+import { HEADLINE } from '../config/headline';
+import { stats, totalDownloads } from '../data/stats';
+import { EMAIL, SOCIAL } from '../data/projects';
+
+interface Props {
+  locale: Locale;
+  title?: string;
+  description?: string;
+  noindex?: boolean;
+}
+
+const { locale, noindex = false } = Astro.props;
+const { t, num } = useI18n(locale);
+const site = 'https://ducmai.me';
+const meta = LOCALE_META[locale];
+const title = Astro.props.title ?? t.meta.title;
+const description = Astro.props.description ?? t.meta.description;
+const canonical = new URL(meta.path, site).href;
+const ogImage = `${site}/og/${locale}.png`;
+
+const client = clientStrings(t, locale, {
+  line: [
+    `npm      ${num(totalDownloads)} / month`,
+    `github   ${num(stats.github.followers)} followers`,
+    `viblo    ${num(stats.viblo.views)} views · ${stats.viblo.posts} posts`,
+    `as of    ${stats.asOf}`,
+  ],
+});
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': `${site}/#person`,
+      name: 'Duc Trung Mai',
+      alternateName: ['Duc Mai', 'Mai Trung Đức'],
+      url: `${site}/`,
+      image: `${site}/og/en.png`,
+      jobTitle: 'Software Engineer',
+      worksFor: { '@type': 'Organization', name: 'TikTok' },
+      address: { '@type': 'PostalAddress', addressLocality: 'Singapore', addressCountry: 'SG' },
+      email: `mailto:${EMAIL}`,
+      knowsAbout: ['React Native native modules', 'Fabric / New Architecture', 'Lynx', 'Browser runtimes', 'WebAssembly', 'Client performance', 'Distributed systems'],
+      sameAs: [SOCIAL.github, SOCIAL.linkedin, SOCIAL.x, SOCIAL.viblo],
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${site}/#website`,
+      url: `${site}/`,
+      name: 'Duc Trung Mai',
+      inLanguage: LOCALES.map((l) => LOCALE_META[l].htmlLang),
+      author: { '@id': `${site}/#person` },
+    },
+    {
+      '@type': 'ProfilePage',
+      url: canonical,
+      name: title,
+      inLanguage: meta.htmlLang,
+      dateModified: stats.asOf,
+      mainEntity: { '@id': `${site}/#person` },
+    },
+  ],
+};
+
+// Runs before first paint: resolves theme, motion, sound and HUD preferences
+// so the page never flashes the wrong palette. Kept dependency-free and tiny.
+const prefsScript = `(function(){var d=document.documentElement,mm=function(q){return matchMedia(q).matches};function g(k){try{return localStorage.getItem('dm:'+k)}catch(e){return null}}var tp=g('theme');if(tp!=='light'&&tp!=='dark')tp='system';d.dataset.themePref=tp;d.dataset.theme=tp==='system'?(mm('(prefers-color-scheme: light)')?'light':'dark'):tp;var m=g('motion');if(m!=='on'&&m!=='off')m=mm('(prefers-reduced-motion: reduce)')?'off':'on';d.dataset.motion=m;d.dataset.sound=g('sound')==='off'?'off':'on';var h=g('hud');d.dataset.hud=(h==='on'||h==='off')?h:(innerWidth>=1100?'on':'off');var c=document.querySelector('meta[name=theme-color]');if(c)c.content=d.dataset.theme==='light'?'#f7f6f3':'#07080b'})();`;
+---
+
+<!doctype html>
+<html lang={meta.htmlLang} data-theme="dark" data-theme-pref="system" data-motion="on" data-sound="on" data-hud="off" data-layer="0">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#07080b" />
+    <meta name="color-scheme" content="dark light" />
+    <script is:inline set:html={prefsScript} />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content="Duc Trung Mai" />
+    {noindex && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    {!noindex && LOCALES.map((l) => <link rel="alternate" hreflang={LOCALE_META[l].htmlLang} href={new URL(LOCALE_META[l].path, site).href} />)}
+    {!noindex && <link rel="alternate" hreflang="x-default" href={`${site}/`} />}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="preload" href="/fonts/geist-latin.woff2" as="font" type="font/woff2" crossorigin />
+    {locale === 'vi' && <link rel="preload" href="/fonts/geist-vi.woff2" as="font" type="font/woff2" crossorigin />}
+    {locale === 'vi' && <link rel="preload" href="/fonts/geist-mono-vi.woff2" as="font" type="font/woff2" crossorigin />}
+    <link rel="sitemap" href="/sitemap.xml" />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:site_name" content="Duc Trung Mai · ducmai.me" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:title" content={`${t.meta.name}: ${HEADLINE[locale]}`} />
+    <meta property="og:description" content={description} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={t.meta.ogAlt} />
+    <meta property="og:locale" content={meta.og} />
+    <meta property="profile:first_name" content="Duc" />
+    <meta property="profile:last_name" content="Mai" />
+    <meta property="profile:username" content="maitrungduc1410" />
+    {LOCALES.filter((l) => l !== locale).map((l) => <meta property="og:locale:alternate" content={LOCALE_META[l].og} />)}
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:site" content="@maitrungduc1410" />
+    <meta name="twitter:creator" content="@maitrungduc1410" />
+    <meta name="twitter:title" content={`${t.meta.name}: ${HEADLINE[locale]}`} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    <meta name="twitter:image:alt" content={t.meta.ogAlt} />
+    <script type="application/ld+json" is:inline set:html={JSON.stringify(jsonLd)} />
+  </head>
+  <body>
+    <a class="skip" href="#main">{t.nav.skip}</a>
+    <Stage locale={locale} />
+    <Nav locale={locale} />
+    <SoundHint locale={locale} />
+    <Depth locale={locale} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+    <Palette locale={locale} />
+    <Hud locale={locale} />
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script type="application/json" id="i18n" is:inline set:html={JSON.stringify(client)} />
+    <script>
+      import '../scripts/main';
+    </script>
+  </body>
+</html>

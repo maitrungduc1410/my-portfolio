@@ -1,0 +1,19 @@
+---
+import { useI18n, type Locale } from '../i18n';
+interface Props { locale: Locale }
+const { t } = useI18n(Astro.props.locale);
+---
+
+<dialog class="pal" id="palette" aria-label={t.palette.title}>
+  <div class="pal__box">
+    <label class="pal__in">
+      <span aria-hidden="true"><svg class="ico ico--prompt" viewBox="0 0 16 16" aria-hidden="true"><path d="M5.5 3 10.5 8l-5 5" /></svg></span>
+      <input id="pal-input" type="text" autocomplete="off" spellcheck="false" placeholder={t.palette.placeholder}
+        role="combobox" aria-expanded="true" aria-controls="pal-list" aria-autocomplete="list" aria-label={t.palette.title} />
+      <kbd>esc</kbd>
+    </label>
+    <div class="pal__out" id="pal-out" aria-live="polite"></div>
+    <ul class="pal__list" id="pal-list" role="listbox" aria-label={t.palette.title}></ul>
+    <p class="pal__foot">{t.palette.footer}</p>
+  </div>
+</dialog>

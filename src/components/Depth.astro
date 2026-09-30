@@ -1,0 +1,16 @@
+---
+import { LOCALE_META, useI18n, type Locale } from '../i18n';
+import { LAYER_ANCHORS } from '../data/projects';
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const { t } = useI18n(locale);
+const base = LOCALE_META[locale].path;
+---
+
+<nav class="depth" aria-label={t.depth.label}>
+  {t.layers.map((l, i) => (
+    <a href={`${base}#${LAYER_ANCHORS[i]}`} data-depth={i} style={`--c:var(--l${i})`} aria-label={t.depth.jump(l.section)}>
+      <i>{l.code}</i><span>{l.section}</span>
+    </a>
+  ))}
+</nav>

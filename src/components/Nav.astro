@@ -1,0 +1,62 @@
+---
+import { LOCALES, LOCALE_META, useI18n, type Locale } from '../i18n';
+import { SECTIONS } from '../data/projects';
+
+interface Props { locale: Locale }
+const { locale } = Astro.props;
+const { t } = useI18n(locale);
+const base = LOCALE_META[locale].path;
+const links = SECTIONS.filter((s) => s.nav && s.nav !== 'career');
+---
+
+<header class="nav">
+  <div class="wrap nav__in">
+    <a class="brand" href={`${base}#top`} aria-label={t.nav.brand}>
+      <span class="brand__mark" aria-hidden="true">DM</span>
+      <span class="brand__name">Duc Trung Mai</span>
+    </a>
+    <nav class="nav__links" aria-label={t.nav.sections}>
+      {links.map((s) => <a href={`${base}#${s.id}`} data-nav={s.id}>{t.nav[s.nav!]}</a>)}
+    </nav>
+    <div class="nav__act">
+      <button class="ibtn ibtn--k" type="button" data-action="palette" aria-label={t.nav.palette} aria-keyshortcuts="Meta+K Control+K">
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><path d="M2.5 4.5 6 8l-3.5 3.5M8 12h5.5"/></svg>
+        <kbd data-kbd>⌘K</kbd>
+      </button>
+
+      <div class="lang" data-lang>
+        <button class="ibtn" type="button" aria-haspopup="true" aria-expanded="false" aria-label={t.nav.language} data-lang-btn>
+          <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><circle cx="8" cy="8" r="6.2"/><path d="M1.8 8h12.4M8 1.8c1.8 1.9 2.6 3.9 2.6 6.2S9.8 12.3 8 14.2C6.2 12.3 5.4 10.3 5.4 8S6.2 3.7 8 1.8Z"/></svg>
+          <span style="font:600 11.5px var(--mono)">{LOCALE_META[locale].short}</span>
+        </button>
+        <div class="lang__menu" role="menu">
+          {LOCALES.map((l) => (
+            <a role="menuitem" href={LOCALE_META[l].path} hreflang={LOCALE_META[l].htmlLang} lang={LOCALE_META[l].htmlLang} aria-current={l === locale ? 'page' : undefined} data-lang-link>
+              {LOCALE_META[l].label}<small>{LOCALE_META[l].short}</small>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      <button class="ibtn" type="button" data-action="theme" aria-label={`${t.nav.theme.label}: ${t.nav.theme.system}`} data-label={t.nav.theme.label}>
+        <svg class="i-sys" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4" aria-hidden="true"><rect x="1.8" y="2.6" width="12.4" height="8.6" rx="1.6"/><path d="M5.5 13.8h5M8 11.2v2.6"/><path d="M8 4.6v4.6a2.3 2.3 0 0 0 0-4.6Z" fill="currentColor"/></svg>
+        <svg class="i-sun" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 1v1.6M8 13.4V15M1 8h1.6M13.4 8H15M3.05 3.05l1.13 1.13M11.82 11.82l1.13 1.13M12.95 3.05l-1.13 1.13M4.18 11.82l-1.13 1.13"/></svg>
+        <svg class="i-moon" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M13.2 9.9A5.6 5.6 0 0 1 6.1 2.8 5.7 5.7 0 1 0 13.2 9.9Z"/></svg>
+      </button>
+
+      <button class="ibtn" type="button" data-action="sound" aria-pressed="false" aria-label={t.nav.sound.label}>
+        <svg class="i-snd-off" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h2.5L8 3v10L4.5 10H2Z"/><path d="m11 6 3.5 4M14.5 6 11 10"/></svg>
+        <svg class="i-snd-on" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 6h2.5L8 3v10L4.5 10H2Z"/><path class="snd-w" d="M10.5 5.8a3 3 0 0 1 0 4.4M12.4 4a5.6 5.6 0 0 1 0 8"/><g class="snd-b" fill="currentColor" stroke="none"><rect data-snd-bar x="9.6" y="3" width="1.6" height="10" rx=".8"/><rect data-snd-bar x="11.9" y="3" width="1.6" height="10" rx=".8"/><rect data-snd-bar x="14.2" y="3" width="1.6" height="10" rx=".8"/></g></svg>
+      </button>
+
+      <button class="ibtn nav__opt" type="button" data-action="motion" aria-pressed="true" aria-label={t.nav.motion.label}>
+        <svg class="i-mot-off" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><rect x="3" y="3" width="10" height="10" rx="2"/><path d="M3 13 13 3"/></svg>
+        <svg class="i-mot-on" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M1.5 8c2-4 4-4 6.5 0s4.5 4 6.5 0"/></svg>
+      </button>
+
+      <button class="ibtn nav__opt" type="button" data-action="hud" aria-pressed="false" aria-label={t.nav.hud.label}>
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M2 13V9M5.3 13V6M8.6 13V8M12 13V3"/></svg>
+      </button>
+    </div>
+  </div>
+</header>

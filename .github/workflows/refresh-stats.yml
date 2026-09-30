@@ -1,0 +1,118 @@
+# Refreshes the public numbers on ducmai.me every Monday, merges the result and
+# redeploys.
+#
+# The site already fetches GitHub, npm and Viblo numbers at build time, but
+# only when something triggers a build. This job makes sure a build happens at
+# least weekly, and keeps the committed snapshot in src/data (the fallback used
+# when an API is unreachable) no more than a week old.
+#
+# Flow: fetch -> commit the snapshot to bot/refresh-stats -> open or update one
+# PR -> merge it -> dispatch the deploy workflow.
+#
+# ONE-TIME REPOSITORY SETTINGS this job depends on:
+#   Settings -> Actions -> General -> Workflow permissions:
+#     tick "Allow GitHub Actions to create and approve pull requests",
+#     otherwise `gh pr create` is refused.
+#   If master is protected with required reviews, the merge step can only
+#   queue auto-merge and the PR waits for a human. Required status checks are
+#   fine: auto-merge completes once they pass.
+#
+# WHY THE DEPLOY IS DISPATCHED BY HAND: a push made with the workflow's own
+# GITHUB_TOKEN does not trigger other workflows, so merging the PR here would
+# not fire deploy-pages.yml's push trigger. workflow_dispatch is the documented
+# exception, so the last step calls it explicitly.
+
+name: Refresh public stats
+
+on:
+  schedule:
+    # Mondays 00:17 UTC (08:17 in Singapore). Off the hour because scheduled
+    # runs at :00 are the ones GitHub delays or drops under load.
+    - cron: '17 0 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: refresh-stats
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    name: Fetch, open PR, merge, deploy
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      # Push the bot branch and merge into master.
+      contents: write
+      # Open and merge the PR.
+      pull-requests: write
+      # Dispatch deploy-pages.yml.
+      actions: write
+    env:
+      BRANCH: bot/refresh-stats
+      BASE: master
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v7
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+
+      # The script uses only Node built-ins, so no npm install. It exits
+      # non-zero, and leaves the snapshot untouched, if any source failed or
+      # came back empty, so a bad week fails loudly instead of zeroing the page.
+      - name: Fetch the numbers into the snapshot
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node scripts/fetch-stats.mjs --snapshot
+
+      - name: Commit to the bot branch
+        id: commit
+        run: |
+          set -euo pipefail
+          if git diff --quiet -- src/data/stats.snapshot.json; then
+            echo "Snapshot unchanged, nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          as_of=$(node -p "require('./src/data/stats.snapshot.json').asOf")
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git switch -C "$BRANCH"
+          git add src/data/stats.snapshot.json
+          git commit -m "chore(stats): refresh public numbers as of $as_of"
+          # Always rebuilt from the base branch, so force-pushing only ever
+          # replaces the bot's own previous attempt.
+          git push --force origin "$BRANCH"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "as_of=$as_of" >> "$GITHUB_OUTPUT"
+
+      - name: Open or update the PR, then merge it
+        if: steps.commit.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          pr=$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number // empty')
+          if [ -z "$pr" ]; then
+            gh pr create --base "$BASE" --head "$BRANCH" \
+              --title "chore(stats): refresh public numbers as of ${{ steps.commit.outputs.as_of }}" \
+              --body "Weekly refresh of GitHub stars and followers, npm monthly downloads and Viblo stats in \`src/data/stats.snapshot.json\`. Opened and merged by \`.github/workflows/refresh-stats.yml\`."
+            pr=$(gh pr list --head "$BRANCH" --base "$BASE" --state open --json number --jq '.[0].number')
+          fi
+          # A direct merge works on an unprotected branch. On a protected one
+          # it is refused, and --auto queues the merge for when the rules pass.
+          if ! gh pr merge "$pr" --squash --delete-branch; then
+            gh pr merge "$pr" --squash --delete-branch --auto
+            echo "::notice::PR #$pr is queued for auto-merge and waits for the branch rules."
+          fi
+
+      # Runs even when the merge was only queued: the build fetches the numbers
+      # live on its own, so the site is fresh either way and the snapshot just
+      # catches up when the PR lands.
+      - name: Deploy the refreshed site
+        if: steps.commit.outputs.changed == 'true'
+        run: gh workflow run deploy-pages.yml --ref "$BASE"

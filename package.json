@@ -1,0 +1,32 @@
+{
+  "name": "ducmai-me",
+  "private": true,
+  "type": "module",
+  "version": "2.0.0",
+  "description": "Source of ducmai.me: Layer Dive.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "stats": "node scripts/fetch-stats.mjs",
+    "stats:snapshot": "node scripts/fetch-stats.mjs --snapshot",
+    "prebuild": "node scripts/fetch-stats.mjs",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "og": "node scripts/make-og.mjs",
+    "smoke": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "astro": "^7.3.5",
+    "motion": "^13.4.5",
+    "three": "^0.186.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/three": "^0.186.0",
+    "playwright": "^1.57.0",
+    "typescript": "^6.0.3"
+  }
+}

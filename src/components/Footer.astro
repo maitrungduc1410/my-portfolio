@@ -1,0 +1,19 @@
+---
+import { useI18n, type Locale } from '../i18n';
+interface Props { locale: Locale }
+const { t } = useI18n(Astro.props.locale);
+---
+
+<footer class="foot">
+  <div class="wrap foot__in">
+    <div>
+      <p class="mono">© 2026 Duc Trung Mai · ducmai.me · {t.footer.shortcut}</p>
+    </div>
+    <div class="foot__set" role="group" aria-label={t.nav.settings}>
+      <button class="tbtn" type="button" data-action="theme" data-label={t.nav.theme.label} data-foot-theme>{t.nav.theme.label}</button>
+      <button class="tbtn" type="button" data-action="motion" aria-pressed="true">{t.nav.motion.label}</button>
+      <button class="tbtn" type="button" data-action="sound" aria-pressed="false">{t.nav.sound.label}</button>
+      <button class="tbtn" type="button" data-action="hud" aria-pressed="false">{t.nav.hud.label}</button>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.astro/
+.cache/
+src/data/stats.live.json
+test-results/
+*.log
+.DS_Store
+_site
+screens
