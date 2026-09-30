@@ -1,5 +1,9 @@
 # ducmai.me
 
+<div align="center">
+  <img src="./demo.png" height="600" />
+</div>
+
 Source of [ducmai.me](https://ducmai.me): "Layer Dive". The page is a stack of five layers, from the
 UI down to frames, and scrolling moves you down through them.
 
