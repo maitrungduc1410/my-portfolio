@@ -1,11 +1,11 @@
 {
   "github": {
-    "followers": 411,
-    "publicRepos": 99,
+    "followers": 422,
+    "publicRepos": 100,
     "stars": {
-      "vivari": 85,
-      "react-native-video-trim": 177,
-      "react-native-loader-kit": 237,
+      "vivari": 89,
+      "react-native-video-trim": 176,
+      "react-native-loader-kit": 236,
       "react-native-shared-hero": 38,
       "react-native-signature-ink": 36,
       "react-native-waveform-player": 25,
@@ -23,31 +23,31 @@
   },
   "npm": {
     "period": "last-month",
-    "start": "2026-09-23",
-    "end": "2026-10-22",
+    "start": "2026-09-30",
+    "end": "2026-10-29",
     "downloads": {
-      "node-scp": 110999,
-      "react-native-video-trim": 88492,
-      "react-native-loader-kit": 15071,
-      "react-native-shared-hero": 506,
-      "react-native-signature-ink": 2097,
-      "react-native-waveform-player": 3212,
-      "react-native-waveform-recorder": 3349,
-      "react-native-pointer-location": 1339,
-      "react-native-zalo-kit": 640,
-      "react-native-textflow": 21,
-      "react-native-new-feature": 97,
-      "react-native-tooltipster": 106,
-      "react-native-motion-splash": 90,
-      "vivari": 15,
-      "socket.io-mesh-adapter": 26
+      "node-scp": 124356,
+      "react-native-video-trim": 93682,
+      "react-native-loader-kit": 15778,
+      "react-native-shared-hero": 877,
+      "react-native-signature-ink": 1799,
+      "react-native-waveform-player": 2278,
+      "react-native-waveform-recorder": 3052,
+      "react-native-pointer-location": 1994,
+      "react-native-zalo-kit": 778,
+      "react-native-textflow": 11,
+      "react-native-new-feature": 94,
+      "react-native-tooltipster": 90,
+      "react-native-motion-splash": 91,
+      "vivari": 12,
+      "socket.io-mesh-adapter": 11
     }
   },
   "viblo": {
     "posts": 88,
-    "views": 1044012,
-    "followers": 2909,
-    "claps": 5371,
+    "views": 1044858,
+    "followers": 2912,
+    "claps": 5374,
     "latest": "2025-04-12",
     "featured": [
       {
@@ -55,15 +55,15 @@
         "title": "Con đường mình trở thành Software Engineer ở Singapore",
         "url": "https://viblo.asia/p/con-duong-minh-tro-thanh-software-engineer-o-singapore-bJzKmaoDK9N",
         "claps": 234,
-        "views": 16234,
+        "views": 16277,
         "published": "2021-01-03"
       },
       {
         "id": "aAY4q2zKJPw",
         "title": "Trải nghiệm phỏng vấn Software Engineer của mình tại TikTok Singapore",
         "url": "https://viblo.asia/p/trai-nghiem-phong-van-software-engineer-cua-minh-tai-tiktok-singapore-aAY4q2zKJPw",
-        "claps": 177,
-        "views": 11966,
+        "claps": 178,
+        "views": 12001,
         "published": "2024-02-15"
       },
       {
@@ -71,7 +71,7 @@
         "title": "Nhập môn CICD với Gitlab",
         "url": "https://viblo.asia/p/nhap-mon-cicd-voi-gitlab-07LKX9WPZV4",
         "claps": 195,
-        "views": 61990,
+        "views": 62036,
         "published": "2020-07-31"
       },
       {
@@ -79,7 +79,7 @@
         "title": "Dockerize ứng dụng NodeJS",
         "url": "https://viblo.asia/p/dockerize-ung-dung-nodejs-RnB5pxEG5PG",
         "claps": 258,
-        "views": 36505,
+        "views": 36524,
         "published": "2019-12-20"
       },
       {
@@ -87,10 +87,10 @@
         "title": "Nâng cao chất lượng code và hiệu quả làm việc nhóm với Husky, Lint-Staged, CommitLint",
         "url": "https://viblo.asia/p/nang-cao-chat-luong-code-va-hieu-qua-lam-viec-nhom-voi-husky-lint-staged-commitlint-4dbZNnMnZYM",
         "claps": 168,
-        "views": 37336,
+        "views": 37345,
         "published": "2020-10-11"
       }
     ]
   },
-  "asOf": "2026-10-26"
+  "asOf": "2026-11-02"
 }
